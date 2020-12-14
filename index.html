@@ -1,0 +1,69 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>Snake Multiplayer Game</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="/style.css" type="text/css" />
+</head>
+<body>
+    <div class="content-section">
+        <div id="titleSection">
+            <h1 id="title">Snake Game</h1>
+            <Ul>
+                <li> Use Arrow Keys to move. </li>
+                <li> Eat food to grow. </li>
+                <li> Don't Hit other Snakes. </li>
+            </Ul>
+        </div>
+        <form method="post" action="/game" onsubmit="return validation()">
+
+            <div class="form-group">
+                <input type="text" class="form-control" name="nickname" placeholder="Nickname" id="username" onchange="validation()" />
+                <span id="error_username"> </span>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-outline-info">Play</button>
+            </div>
+        </form>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Need to save your highest score? <a class="ml-2" href="/login">Login</a> or <a class="ml-2" href="/signup">Sign Up</a>
+            </small>
+        </div>
+    </div>
+    <script>
+        function validation() {
+            var username = document.getElementById("username");
+            var username_error = document.getElementById("error_username");
+
+            // Validate Username
+            if (username.value == "") {
+                username.style.border = "1px solid red";
+                username.style.color = "red";
+                username_error.textContent = "Username is required";
+                username_error.style.color = "red";
+                username.focus();
+
+                return false;
+            }
+            else {
+                if (username.value.length <= 2) {
+                    username_error.innerHTML = "Username is too short.";
+                    username_error.style.color = "#FF0000"; //red color
+
+                    return false;
+                }
+                else {
+                    username.style.border = "1px solid #ced4da";
+                    username.style.color = "#495057";
+                    username_error.textContent = "";
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
+
