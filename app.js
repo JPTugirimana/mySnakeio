@@ -20,12 +20,25 @@ const Apple = require('./apple');
 
 var mysql = require('mysql2');
 
+/*
+// Development Database
 var con = mysql.createConnection({
     host: "localhost",      
     user: "root",           // your username (such as mysql workbench username)
     password: "Admin@1",    // your password (such as mysql workbench password)
     database: "mydatabase"  // your database name
 });
+
+**/
+
+// Production Database
+var con = mysql.createConnection({
+    host: "us-cdbr-east-02.cleardb.com",
+    user: "b577d9fd96d1bb",           // your username (such as mysql workbench username)
+    password: "852a2afd",    // your password (such as mysql workbench password)
+    database: "heroku_01dadcf0194193c"  // your database name
+});
+
 
 con.connect(function (err)
 {
@@ -190,7 +203,6 @@ io.on('connection', (client) => {
         con.query(sql, [name], function (err, result) {
             if (err) throw err;  // check connection
 
-            console.log(result[0].highestScore);
             if (result[0].highestScore < player.points) {   
 
                 var sql = "UPDATE snakegame SET highestScore = ? WHERE name = ?";
