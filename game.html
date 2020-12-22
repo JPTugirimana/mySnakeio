@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/style.css" type="text/css" />
 </head>
 <body>
+
     <div id="scores">
         <div id="own">
             <h2> Leaderboard </h2>
@@ -17,10 +18,14 @@
         <hr />
         <div id="others">
         </div>
+        <hr />
+        <div id="bestScore" value="<%= highestScore %>" hidden>
+            Highest Score: <%= highestScore %>
+        </div>
     </div>
 
-    <!---- <script src="/socket.io/socket.io.js"></script> --->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
         GameCanvas = (function () {
@@ -54,7 +59,6 @@
 
                 // Render scores
                 players.forEach((p) => {
-
                     // scores
                     $('#others')
                         .append($('<span>')
@@ -84,6 +88,13 @@
 
             return GameCanvas;
         })();
+        /* Highest Score */
+        var score = '<%= highestScore %>';
+
+        if (score != '') {
+            $('#bestScore').removeAttr('hidden');
+            console.log(score);
+        }
 
         /*
           Initialize Game

@@ -55,3 +55,7 @@ body {
     font-size: 60%;
     font-weight: 400;
 }
+
+#bestScore {
+    color: blue;
+}

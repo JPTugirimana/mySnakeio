@@ -15,6 +15,31 @@ var bodyParser = require('body-parser');
 const Snake = require('./snake');
 const Apple = require('./apple');
 
+// Connect to the database
+//-----------------------------
+
+var mysql = require('mysql2');
+
+var con = mysql.createConnection({
+    host: "localhost",      
+    user: "root",           // your username (such as mysql workbench username)
+    password: "Admin@1",    // your password (such as mysql workbench password)
+    database: "mydatabase"  // your database name
+});
+
+con.connect(function (err)
+{
+    if (err) throw err;
+
+ var sql = "CREATE TABLE IF NOT EXISTS snakegame (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), password VARCHAR(255), highestScore INT)";
+
+    con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log("Table created");
+    });
+});  
+//---END of Database Connection
+
 // ID's seed
 let autoId = 0;
 
@@ -41,26 +66,71 @@ app.get('/', function (req, res) {
 
 app.post('/game', function (req, res) {
     var name = req.body.nickname;
-    res.render('game.html', { Nickname: name });
+    var highestScore = '';
+    res.render('game.html', { Nickname: name, highestScore: highestScore });
 }); 
 
 // Login and signup routes
 app.get('/login', function (req, res) {
-    res.sendFile(__dirname + '/login.html');
+    res.render('login.html', { error: '' });
 });
 
 app.post('/login', function (req, res) {
-   // res.sendFile(__dirname + '/login.html');
-    var message = "errors";
-    res.render('login.html', { error: message });
+        var name = req.body.username;
+        var password = req.body.password;
+
+        var sql = "SELECT name, highestScore FROM snakegame WHERE name = ? AND password = ?";
+
+        con.query(sql, [name, password], function (err, result)
+        {
+            if (err) throw err;
+
+            if (result.length > 0)
+            {
+                var highestScore = result[0].highestScore;
+                res.render('game.html', { Nickname: result[0].name, highestScore: highestScore });
+            }
+            else
+            {
+                res.render('login.html', { error: 'Wrong username or password.' });
+            }  
+        });  
 });
 
 app.post('/signup', function (req, res) {
-    //res.sendFile(__dirname + '/index.html');
+    var name = req.body.username;
+    var password = req.body.password;
+    var confirm_password = req.body.confirm_password;
+
+    if (password !== confirm_password) {
+        res.render('signup.html', { error: "Passwords don't match" });
+    }
+
+    var sql = "SELECT name FROM snakegame WHERE name = ?";
+
+    con.query(sql, [name], function (err, result) {
+        if (err) throw err;  // check connection
+
+        if (result.length > 0) {   // check if username is in the database
+            res.render('signup.html', { error: 'Username already taken!' });
+        }
+        else {       
+            var sql = "INSERT INTO snakegame (name, password, highestScore) VALUES ?";
+            var highestScore = 0;
+            var values = [[name, password, highestScore]];
+
+            con.query(sql, [values], function (err, result) {
+                if (err) throw err;
+                console.log("Number of records inserted: " + result.affectedRows);
+            });
+
+            res.render('game.html', { Nickname: name, highestScore: highestScore });
+        }
+    });
 }); 
 
 app.get('/signup', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
+    res.render('signup.html', { error: '' });
 });
 
 
@@ -111,10 +181,32 @@ io.on('connection', (client) => {
 
     // Remove players on disconnect
     client.on('disconnect', () => {
-        console.log(player.points);
-        _.remove(players, player);
 
+        // record new score
+        var name = player.nickname;
+
+        var sql = "SELECT name, highestScore FROM snakegame WHERE name = ?";
+
+        con.query(sql, [name], function (err, result) {
+            if (err) throw err;  // check connection
+
+            console.log(result[0].highestScore);
+            if (result[0].highestScore < player.points) {   
+
+                var sql = "UPDATE snakegame SET highestScore = ? WHERE name = ?";
+                var newScore = player.points;
+
+                con.query(sql, [newScore, name], function (err, result) {
+                    if (err) throw err;
+                    console.log(newScore);
+                });
+            }
+        });
+
+        _.remove(players, player);
     });
+
+
 });
 
 // Create apples
