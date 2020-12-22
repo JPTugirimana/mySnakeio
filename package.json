@@ -14,5 +14,10 @@
     "mysql": "^2.18.1",
     "mysql2": "^2.2.5",
     "socket.io": "^3.0.3"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }
+
+
